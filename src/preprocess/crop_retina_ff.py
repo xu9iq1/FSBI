@@ -12,6 +12,11 @@ from imutils import face_utils
 from retinaface.pre_trained_models import get_model
 from retinaface.utils import vis_annotations
 import torch
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT_DIR / 'src'))
+from utils.runtime import get_device
 
 
 def facecrop(model,org_path,save_path,period=1,num_frames=10):
@@ -78,6 +83,7 @@ if __name__=='__main__':
 	parser.add_argument('-d',dest='dataset',choices=['DeepFakeDetection_original','DeepFakeDetection','FaceShifter','Face2Face','Deepfakes','FaceSwap','NeuralTextures','Original','Celeb-real','Celeb-synthesis','YouTube-real','DFDC','DFDCP'])
 	parser.add_argument('-c',dest='comp',choices=['raw','c23','c40'],default='c23')
 	parser.add_argument('-n',dest='num_frames',type=int,default=32)
+	parser.add_argument('--device', default='auto')
 	args=parser.parse_args()
 	if args.dataset=='Original':
 		dataset_path='data/FaceForensics++/original_sequences/youtube/{}/'.format(args.comp)
@@ -93,7 +99,8 @@ if __name__=='__main__':
 	else:
 		raise NotImplementedError
 
-	device=torch.device('mps')
+	device=get_device(args.device)
+	print(f'Using device: {device}')
 
 	model = get_model("resnet50_2020-07-20", max_size=2048,device=device)
 	model.eval()

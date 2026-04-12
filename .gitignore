@@ -5,3 +5,7 @@ data/FaceForensics++/*
 DFD.drawio
 test.py
 commands.txt
+.venv/
+.codex
+__pycache__/
+*.pyc

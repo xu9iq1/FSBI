@@ -1,0 +1,9 @@
+albumentations
+efficientnet_pytorch
+imutils
+opencv-python-headless
+PyWavelets
+retinaface-pytorch
+scikit-learn
+pandas
+dlib

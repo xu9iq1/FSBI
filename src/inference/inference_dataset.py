@@ -25,9 +25,11 @@ import warnings
 import cv2
 from skimage import feature
 from skimage import filters
+from utils.runtime import get_device, seed_everything
 warnings.filterwarnings('ignore')
 
 def main(args, model_path, w):
+    device = get_device(args.device)
     model=None
     # if w[0]=="r":model=Detector1()
     # if w[0]=="m":model=Detector2()
@@ -93,7 +95,6 @@ def main(args, model_path, w):
                 # face_list2.append(img_dwt)
             
             img = torch.tensor(face_list).to(device)
-            print(img.shape)
 
             # img=torch.tensor(face_list).to(device).float()/255
             # img2 = torch.tensor(face_list2).to(device)
@@ -145,30 +146,23 @@ def main(args, model_path, w):
 
 
 if __name__=='__main__':
-    seed=1
-    random.seed(seed)
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    torch.mps.manual_seed(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-
-    device = torch.device('mps')
-
     parser=argparse.ArgumentParser()
     parser.add_argument('-w',dest='weight_name',type=str)
     parser.add_argument('-d',dest='dataset',type=str)
     parser.add_argument('-n',dest='n_frames',default=32,type=int)
     parser.add_argument('-t',dest='type',default="Face2Face",type=str)
+    parser.add_argument('--device', default='auto')
+    parser.add_argument('--seed', type=int, default=1)
     args=parser.parse_args()
 
+    seed_everything(args.seed, get_device(args.device))
     # weights = ['14_0.9988_val.tar']
     # weights = ['e_sbi380_e85_v9990.tar', 'e_sbi380_e89_9988.tar','e_sbi48_e4_v9994.tar','e_sbi48_e16_v9990.tar','e_sbi48_e20_v9991.tar','e_sbi48_e22_v9991.tar','e_sbi48_e25_v9988.tar','sbi380_e88_v9991.tar','sbi380_e91_v9992.tar', 'eb5_RBG.tar', '4_0.9994_val.tar',]
-    weights = os.listdir("./weights")
+    weights = [args.weight_name] if args.weight_name else os.listdir("./weights")
     
     for w in weights:
         if w[0] == "d":continue
         print(w)
-        main(args, os.path.join("./weights",w),w)
+        model_path = w if os.path.isfile(w) else os.path.join("./weights",w)
+        main(args, model_path,w)
         print("-------------------------------------------------------------------")
-

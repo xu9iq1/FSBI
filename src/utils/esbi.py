@@ -26,8 +26,10 @@ warnings.filterwarnings('ignore')
 
 import logging
 
-if os.path.isfile('/home/g202302610/Documents/SelfBlendedImages/src/utils/library/bi_online_generation.py'):
-	sys.path.append('/home/g202302610/Documents/SelfBlendedImages/src/utils/library/')
+os.environ.setdefault('MPLCONFIGDIR', '/tmp/matplotlib')
+LIB_DIR=os.path.join(os.path.dirname(__file__),'library')
+if os.path.isfile(os.path.join(LIB_DIR,'bi_online_generation.py')):
+	sys.path.append(LIB_DIR)
 	# print('exist library')
 	exist_bi=True
 else:

@@ -19,19 +19,22 @@ from datetime import datetime
 from tqdm import tqdm
 from retinaface.pre_trained_models import get_model
 from preprocess import extract_face
+from utils.runtime import get_device, seed_everything
+import cv2
 import warnings
 warnings.filterwarnings('ignore')
 
 def main(args):
+    device = get_device(args.device)
 
     model=Detector()
     model=model.to(device)
-    cnn_sd=torch.load(args.weight_name)["model"]
+    cnn_sd=torch.load(args.weight_name, map_location='cpu')["model"]
     model.load_state_dict(cnn_sd)
     model.eval()
 
     frame = cv2.imread(args.input_image)
-	frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     face_detector = get_model("resnet50_2020-07-20", max_size=max(frame.shape),device=device)
     face_detector.eval()
@@ -47,21 +50,12 @@ def main(args):
 
 
 if __name__=='__main__':
-
-    seed=1
-    random.seed(seed)
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    torch.mps.manual_seed(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-
-    device = torch.device('mps')
-
     parser=argparse.ArgumentParser()
     parser.add_argument('-w',dest='weight_name',type=str)
     parser.add_argument('-i',dest='input_image',type=str)
+    parser.add_argument('--device', default='auto')
+    parser.add_argument('--seed', type=int, default=1)
     args=parser.parse_args()
 
+    seed_everything(args.seed, get_device(args.device))
     main(args)
-

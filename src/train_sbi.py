@@ -14,6 +14,7 @@ from sklearn.metrics import confusion_matrix, roc_auc_score
 import argparse
 from utils.logs import log
 from utils.funcs import load_json
+from utils.runtime import get_device, seed_everything
 from datetime import datetime
 from tqdm import tqdm
 from model import Detector
@@ -26,15 +27,10 @@ def compute_accuray(pred,true):
 def main(args):
     cfg=load_json(args.config)
 
-    seed=5
-    random.seed(seed)
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    torch.mps.manual_seed(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-
-    device = torch.device('mps')
+    seed = args.seed
+    device = get_device(args.device)
+    seed_everything(seed, device)
+    print(f'Using device: {device}')
 
     image_size=cfg['image_size']
     batch_size=cfg['batch_size']
@@ -48,8 +44,9 @@ def main(args):
     # train_loader=torch.utils.data.DataLoader(train_dataset,batch_size=batch_size//2,shuffle=True,collate_fn=train_dataset.collate_fn,num_workers=4,pin_memory=True,drop_last=True,worker_init_fn=train_dataset.worker_init_fn)
     # val_loader=torch.utils.data.DataLoader(val_dataset,batch_size=batch_size,shuffle=False,collate_fn=val_dataset.collate_fn,num_workers=4,pin_memory=True,worker_init_fn=val_dataset.worker_init_fn)
 
-    train_loader_esbi=torch.utils.data.DataLoader(train_dataset_esbi,batch_size=batch_size//2,shuffle=True,collate_fn=train_dataset_esbi.collate_fn,num_workers=4,pin_memory=True,drop_last=True,worker_init_fn=train_dataset_esbi.worker_init_fn)
-    val_loader_esbi=torch.utils.data.DataLoader(val_dataset_esbi,batch_size=batch_size,shuffle=False,collate_fn=val_dataset_esbi.collate_fn,num_workers=4,pin_memory=True,worker_init_fn=val_dataset_esbi.worker_init_fn)
+    pin_memory = device.type == 'cuda'
+    train_loader_esbi=torch.utils.data.DataLoader(train_dataset_esbi,batch_size=batch_size//2,shuffle=True,collate_fn=train_dataset_esbi.collate_fn,num_workers=args.num_workers,pin_memory=pin_memory,drop_last=True,worker_init_fn=train_dataset_esbi.worker_init_fn)
+    val_loader_esbi=torch.utils.data.DataLoader(val_dataset_esbi,batch_size=batch_size,shuffle=False,collate_fn=val_dataset_esbi.collate_fn,num_workers=args.num_workers,pin_memory=pin_memory,worker_init_fn=val_dataset_esbi.worker_init_fn)
     
     model=Detector()
     # cnn_sd=torch.load("/home/g202302610/Documents/SelfBlendedImages/output/epoch_splits/eb4_dwtsym2reflect_sbi_base_01_07_09_01_51/weights/75_0.9980_val.tar")["model"]
@@ -69,10 +66,10 @@ def main(args):
 
 
     now=datetime.now()
-    save_path='output/{}_'.format(args.session_name)+now.strftime(os.path.splitext(os.path.basename(args.config))[0])+'_'+now.strftime("%m_%d_%H_%M_%S")+'/'
-    os.mkdir(save_path)
-    os.mkdir(save_path+'weights/')
-    os.mkdir(save_path+'logs/')
+    session_name = args.session_name or 'run'
+    save_path='output/{}_'.format(session_name)+now.strftime(os.path.splitext(os.path.basename(args.config))[0])+'_'+now.strftime("%m_%d_%H_%M_%S")+'/'
+    os.makedirs(save_path+'weights/', exist_ok=False)
+    os.makedirs(save_path+'logs/', exist_ok=False)
     logger = log(path=save_path+"logs/", file="losses.logs")
 
     criterion=nn.CrossEntropyLoss()
@@ -94,8 +91,8 @@ def main(args):
         train_acc=0.
         model.train()
         for step,data in enumerate(tqdm(t_loader)):
-            img=data['img'].to(device, non_blocking=True).float()
-            target=data['label'].to(device, non_blocking=True).long()
+            img=data['img'].to(device, non_blocking=pin_memory).float()
+            target=data['label'].to(device, non_blocking=pin_memory).long()
             output=model.training_step(img, target)
             loss=criterion(output,target)
             loss_value=loss.item()
@@ -114,8 +111,8 @@ def main(args):
         output_dict, target_dict=[],[]
         np.random.seed(seed)
         for step,data in enumerate(tqdm(v_loader)):
-            img=data['img'].to(device, non_blocking=True).float()
-            target=data['label'].to(device, non_blocking=True).long()
+            img=data['img'].to(device, non_blocking=pin_memory).float()
+            target=data['label'].to(device, non_blocking=pin_memory).long()
             
             with torch.no_grad():
                 output=model(img)
@@ -167,6 +164,9 @@ if __name__=='__main__':
     parser.add_argument('-w',dest='wavelet')
     parser.add_argument('-m',dest='mode')
     parser.add_argument('-e',dest='epoch')
+    parser.add_argument('--device', default='auto')
+    parser.add_argument('--seed', type=int, default=5)
+    parser.add_argument('--num-workers', type=int, default=4)
     args=parser.parse_args()
     main(args)
         
