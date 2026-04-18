@@ -2,6 +2,7 @@ output/*
 weights/*
 data/Celeb-DF-v2/*
 data/FaceForensics++/*
+data/DeeperForensics-1.0/*
 DFD.drawio
 test.py
 commands.txt

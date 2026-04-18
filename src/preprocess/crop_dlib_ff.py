@@ -107,7 +107,11 @@ if __name__=='__main__':
 
     for i in tqdm(range(n_sample)):
         folder_path=movies_path_list[i].replace('videos/','frames/').replace('.mp4','/')
-       
+        frame_count = len(glob(folder_path+'*.png'))
+        landmark_count = len(glob(folder_path.replace('/frames/','/landmarks/')+'*.npy'))
+        if min(frame_count, landmark_count) >= args.num_frames:
+            continue
+
         facecrop(movies_path_list[i],save_path=dataset_path,num_frames=args.num_frames,face_predictor=face_predictor,face_detector=face_detector)
     
 

@@ -39,8 +39,7 @@ class SBI_Dataset(Dataset):
 		
 		assert phase in ['train','val','test']
 		
-		# image_list,label_list=init_ff(phase,'frame',n_frames=n_frames)
-		image_list,label_list=init_cdf(phase,'frame',n_frames=n_frames)
+		image_list,label_list=init_ff(phase,'frame',n_frames=n_frames)
 
 		
 		path_lm='/landmarks/' 

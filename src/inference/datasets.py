@@ -37,23 +37,45 @@ def init_ff(dataset='all',phase='test'):
 	return image_list,label_list
 
 def init_ff_t(dataset='all',phase='test'):
-	folder_list=[]
-	label_list=[]
-
+	assert dataset in ['all','Deepfakes','Face2Face','FaceSwap','NeuralTextures']
 	print("Testing on", dataset)
-	dataset_path = "/home/g202302610/Documents/SelfBlendedImages/data/FaceForensics++"
-	fake_list = os.listdir(f"/home/g202302610/Documents/SelfBlendedImages/data/FaceForensics++/manipulated_sequences/{dataset}/c23/videos")
-	real_list = os.listdir(f"/home/g202302610/Documents/SelfBlendedImages/data/FaceForensics++/original_sequences/youtube/c23/videos")
-	
-	for i in fake_list:
-		folder_list.append(os.path.join(f"/home/g202302610/Documents/SelfBlendedImages/data/FaceForensics++/manipulated_sequences/{dataset}/c23/videos", i))
-		label_list.append(1)
-	
-	for i in real_list:
-		folder_list.append(os.path.join("/home/g202302610/Documents/SelfBlendedImages/data/FaceForensics++/original_sequences/youtube/c23/videos", i))
-		label_list.append(0)
 
-	return folder_list,label_list
+	base_dir = 'data/FaceForensics++'
+	real_dir = os.path.join(base_dir, 'original_sequences', 'youtube', 'c23', 'videos')
+	list_dict = json.load(open(f'{base_dir}/{phase}.json', 'r'))
+	filelist = []
+	for i in list_dict:
+		filelist += i
+
+	real_list = sorted(
+		[
+			os.path.join(real_dir, name)
+			for name in os.listdir(real_dir)
+			if name.endswith('.mp4') and os.path.basename(name)[:3] in filelist
+		]
+	)
+
+	if dataset == 'all':
+		fakes = ['Deepfakes', 'Face2Face', 'FaceSwap', 'NeuralTextures']
+	else:
+		fakes = [dataset]
+
+	fake_videos = []
+	for fake in fakes:
+		fake_dir = os.path.join(base_dir, 'manipulated_sequences', fake, 'c23', 'videos')
+		if not os.path.isdir(fake_dir):
+			continue
+		fake_videos += sorted(
+			[
+				os.path.join(fake_dir, name)
+				for name in os.listdir(fake_dir)
+				if name.endswith('.mp4') and os.path.basename(name)[:3] in filelist
+			]
+		)
+
+	folder_list = fake_videos + real_list
+	label_list = [1] * len(fake_videos) + [0] * len(real_list)
+	return folder_list, label_list
 
 
 def init_dfd():
@@ -128,5 +150,4 @@ def init_cdf():
 			label_list+=[1-int(line[0])]
 		return folder_list,label_list
 		
-
 

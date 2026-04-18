@@ -12,7 +12,8 @@ from PIL import Image
 import sys
 import random
 import shutil
-from model import Detector
+from pathlib import Path
+import importlib.util
 import argparse
 from datetime import datetime
 from tqdm import tqdm
@@ -27,6 +28,13 @@ from skimage import feature
 from skimage import filters
 from utils.runtime import get_device, seed_everything
 warnings.filterwarnings('ignore')
+
+ROOT_MODEL_PATH = Path(__file__).resolve().parents[1] / "model.py"
+spec = importlib.util.spec_from_file_location("train_model", ROOT_MODEL_PATH)
+train_model = importlib.util.module_from_spec(spec)
+assert spec.loader is not None
+spec.loader.exec_module(train_model)
+Detector = train_model.Detector
 
 def main(args, model_path, w):
     device = get_device(args.device)
