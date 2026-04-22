@@ -1,0 +1,4 @@
+output/full_base_sbi_04_17_12_07_58/weights/99_0.9999_val.tar
+Loaded pretrained weights for efficientnet-b5
+CDF| AUC: 0.6944
+-------------------------------------------------------------------

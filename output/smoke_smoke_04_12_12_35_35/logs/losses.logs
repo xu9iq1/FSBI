@@ -1,0 +1,3 @@
+Epoch 1/3 | train loss: 0.6840, train acc: 0.5938, val loss: 0.6969, val acc: 0.4688, val auc: 0.4311
+Epoch 2/3 | train loss: 0.6673, train acc: 0.6667, val loss: 0.6973, val acc: 0.5104, val auc: 0.5111
+Epoch 3/3 | train loss: 0.6514, train acc: 0.6354, val loss: 0.6949, val acc: 0.4688, val auc: 0.5244

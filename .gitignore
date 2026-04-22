@@ -1,12 +1,12 @@
-output/*
 weights/*
+output/**/weights/
 data/Celeb-DF-v2/*
 data/FaceForensics++/*
 data/DeeperForensics-1.0/*
+scripts/*
 DFD.drawio
 test.py
 commands.txt
 .venv/
-.codex
 __pycache__/
 *.pyc

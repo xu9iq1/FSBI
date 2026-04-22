@@ -1,0 +1,5 @@
+output/full_haar_reflect_04_19_18_27_50/weights/50_0.9998_val.tar
+Loaded pretrained weights for efficientnet-b5
+Testing on FaceSwap
+FF| AUC: 0.6610
+-------------------------------------------------------------------

@@ -53,7 +53,7 @@ def main(args, model_path, w):
     if args.dataset == 'FFIW':
         video_list,target_list=init_ffiw()
     elif args.dataset == 'FF':
-        video_list,target_list=init_ff_t(args.type)
+        video_list,target_list=init_ff_t(args.type, compression=args.compression)
     elif args.dataset == 'DFD':
         video_list,target_list=init_dfd()
     elif args.dataset == 'DFDC':
@@ -85,9 +85,9 @@ def main(args, model_path, w):
 
                 b, g, r = cv2.split(facee)
 
-                cA_r, (cH_r, cV_r, cD_r) = pywt.dwt2(r, 'sym2', mode='reflect')
-                cA_g, (cH_g, cV_g, cD_g) = pywt.dwt2(g, 'sym2', mode='reflect')
-                cA_b, (cH_b, cV_b, cD_b) = pywt.dwt2(b, 'sym2', mode='reflect')
+                cA_r, (cH_r, cV_r, cD_r) = pywt.dwt2(r, args.wavelet, mode=args.mode)
+                cA_g, (cH_g, cV_g, cD_g) = pywt.dwt2(g, args.wavelet, mode=args.mode)
+                cA_b, (cH_b, cV_b, cD_b) = pywt.dwt2(b, args.wavelet, mode=args.mode)
 
                 cA_r = cv2.resize(cA_r, (380,380), interpolation=cv2.INTER_LINEAR).astype('float32')
                 cA_g = cv2.resize(cA_g, (380,380), interpolation=cv2.INTER_LINEAR).astype('float32')
@@ -159,6 +159,9 @@ if __name__=='__main__':
     parser.add_argument('-d',dest='dataset',type=str)
     parser.add_argument('-n',dest='n_frames',default=32,type=int)
     parser.add_argument('-t',dest='type',default="Face2Face",type=str)
+    parser.add_argument('-c', '--compression', dest='compression', default='c23', type=str)
+    parser.add_argument('--wavelet', dest='wavelet', default='sym2', type=str)
+    parser.add_argument('--mode', dest='mode', default='reflect', type=str)
     parser.add_argument('--device', default='auto')
     parser.add_argument('--seed', type=int, default=1)
     args=parser.parse_args()

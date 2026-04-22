@@ -36,12 +36,12 @@ def init_ff(dataset='all',phase='test'):
 	image_list+=folder_list
 	return image_list,label_list
 
-def init_ff_t(dataset='all',phase='test'):
+def init_ff_t(dataset='all', phase='test', compression='c23'):
 	assert dataset in ['all','Deepfakes','Face2Face','FaceSwap','NeuralTextures']
 	print("Testing on", dataset)
 
 	base_dir = 'data/FaceForensics++'
-	real_dir = os.path.join(base_dir, 'original_sequences', 'youtube', 'c23', 'videos')
+	real_dir = os.path.join(base_dir, 'original_sequences', 'youtube', compression, 'videos')
 	list_dict = json.load(open(f'{base_dir}/{phase}.json', 'r'))
 	filelist = []
 	for i in list_dict:
@@ -62,7 +62,7 @@ def init_ff_t(dataset='all',phase='test'):
 
 	fake_videos = []
 	for fake in fakes:
-		fake_dir = os.path.join(base_dir, 'manipulated_sequences', fake, 'c23', 'videos')
+		fake_dir = os.path.join(base_dir, 'manipulated_sequences', fake, compression, 'videos')
 		if not os.path.isdir(fake_dir):
 			continue
 		fake_videos += sorted(
@@ -146,8 +146,7 @@ def init_cdf():
 			if "real" in line: continue
 			# print(line)
 			path=line[1].split('/')
-			folder_list+=['data/Celeb-DF-v2/'+path[0]+'/videos/'+path[1]]
+			folder_list+=['data/Celeb-DF-v2/'+path[0]+'/'+path[1]]
 			label_list+=[1-int(line[0])]
 		return folder_list,label_list
 		
-

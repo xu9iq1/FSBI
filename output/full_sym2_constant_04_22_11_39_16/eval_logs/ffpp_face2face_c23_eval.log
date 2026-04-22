@@ -1,0 +1,5 @@
+output/full_sym2_constant_04_22_11_39_16/weights/65_0.9998_val.tar
+Loaded pretrained weights for efficientnet-b5
+Testing on Face2Face
+FF| AUC: 0.9415
+-------------------------------------------------------------------

@@ -1,0 +1,5 @@
+output/full_base_04_13_17_35_59/weights/87_0.9998_val.tar
+Loaded pretrained weights for efficientnet-b5
+Testing on NeuralTextures
+FF| AUC: 0.8899
+-------------------------------------------------------------------
